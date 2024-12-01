@@ -2,3 +2,5 @@ AoC2022/src/aoc5/6mb/boxes.txt
 AoC2022/src/aoc5/6mb/moves.txt
 AoC2022/src/aoc5/88mb/boxes.txt
 AoC2022/src/aoc5/88mb/moves.txt
+**/target/
+flamegraph.svg
