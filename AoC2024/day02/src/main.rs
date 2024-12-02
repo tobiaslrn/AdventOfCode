@@ -10,14 +10,7 @@ fn main() {
 fn part1() {
     let num_ok = INPUT
         .lines()
-        .filter(|line| {
-            let nums = line
-                .split_whitespace()
-                .map(|n| n.parse().unwrap())
-                .collect_vec();
-
-            check_levels(&nums)
-        })
+        .filter(|line| check_levels(&parse_line(line)))
         .count();
 
     println!("part 1: {}", num_ok)
@@ -27,11 +20,7 @@ fn part2() {
     let num_ok = INPUT
         .lines()
         .filter(|line| {
-            let nums: Vec<u32> = line
-                .split_whitespace()
-                .map(|n| n.parse().unwrap())
-                .collect();
-
+            let nums = parse_line(line);
             check_levels(&nums)
                 || (0..nums.len()).any(|i| {
                     let mut modified_numbers = nums.clone();
@@ -42,6 +31,12 @@ fn part2() {
         .count();
 
     println!("part 2: {}", num_ok)
+}
+
+fn parse_line(line: &&str) -> Vec<u32> {
+    line.split_whitespace()
+        .map(|n| n.parse().unwrap())
+        .collect()
 }
 
 fn check_levels(nums: &[u32]) -> bool {
