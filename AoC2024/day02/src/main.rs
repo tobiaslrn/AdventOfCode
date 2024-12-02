@@ -20,12 +20,12 @@ fn part2() {
     let num_ok = INPUT
         .lines()
         .filter(|line| {
-            let nums = parse_line(line);
-            check_levels(&nums)
-                || (0..nums.len()).any(|i| {
-                    let mut modified_numbers = nums.clone();
-                    modified_numbers.remove(i);
-                    check_levels(&modified_numbers)
+            let levels = parse_line(line);
+            check_levels(&levels)
+                || (0..levels.len()).any(|i| {
+                    let mut dampened_levels = levels.clone();
+                    dampened_levels.remove(i);
+                    check_levels(&dampened_levels)
                 })
         })
         .count();
