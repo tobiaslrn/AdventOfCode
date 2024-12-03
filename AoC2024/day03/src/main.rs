@@ -25,7 +25,7 @@ fn part_2() -> usize {
     Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)")
         .unwrap()
         .captures_iter(INPUT)
-        .map(|m| match m.get(0).unwrap().as_str() {
+        .map(|m| match &m[0] {
             "do()" => {
                 enabled = true;
                 0
@@ -34,11 +34,7 @@ fn part_2() -> usize {
                 enabled = false;
                 0
             }
-            _ if enabled => {
-                let a: usize = m.get(1).unwrap().as_str().parse().unwrap();
-                let b: usize = m.get(2).unwrap().as_str().parse().unwrap();
-                a * b
-            }
+            _ if enabled => m[1].parse::<usize>().unwrap() * m[2].parse::<usize>().unwrap(),
             _ => 0,
         })
         .sum()
