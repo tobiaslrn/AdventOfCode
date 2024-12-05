@@ -1,4 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+};
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -6,7 +9,7 @@ fn main() {
     let now = std::time::Instant::now();
     let (r, u) = parse();
     let part1 = part1(&r, &u);
-    let part2 = part2(&r, &u);
+    let part2 = part2(&r, u);
     let elapsed = now.elapsed();
 
     println!("Part 1: {}", part1);
@@ -14,91 +17,45 @@ fn main() {
     println!("Elapsed: {:?}", elapsed);
 }
 
-fn part1(restrictions: &HashSet<(usize, usize)>, updates: &[Vec<usize>]) -> usize {
+fn part1(restrictions: &HashMap<u16, HashSet<u16>>, updates: &[Vec<u16>]) -> u16 {
     updates
         .iter()
-        .filter_map(|update| {
-            let page_map = page_index_map(update);
-            if is_valid_update(restrictions, &page_map) {
-                Some(update[update.len() / 2])
-            } else {
-                None
-            }
-        })
+        .filter(|u| u.is_sorted_by(|a, b| restrictions[a].contains(b)))
+        .map(|update| update[update.len() / 2])
         .sum()
 }
 
-fn part2(restrictions: &HashSet<(usize, usize)>, updates: &[Vec<usize>]) -> usize {
+fn part2(restrictions: &HashMap<u16, HashSet<u16>>, mut updates: Vec<Vec<u16>>) -> u16 {
     updates
-        .iter()
-        .filter_map(|update| {
-            let page_map = page_index_map(update);
-            if !is_valid_update(restrictions, &page_map) {
-                let sorted_update = sort_by_restrictions(update, restrictions);
-                Some(sorted_update[sorted_update.len() / 2])
-            } else {
-                None
-            }
-        })
-        .sum()
-}
-
-fn page_index_map(update: &[usize]) -> HashMap<usize, usize> {
-    update
-        .iter()
-        .enumerate()
-        .map(|(index, &value)| (value, index))
-        .collect()
-}
-
-fn is_valid_update(
-    restrictions: &HashSet<(usize, usize)>,
-    page_index_map: &HashMap<usize, usize>,
-) -> bool {
-    restrictions.iter().all(|&(r_first, r_second)| {
-        let idx_first = page_index_map.get(&r_first);
-        let idx_second = page_index_map.get(&r_second);
-        if let (Some(idx_first), Some(idx_second)) = (idx_first, idx_second) {
-            if idx_first > idx_second {
-                return false;
-            }
-        }
-        true
-    })
-}
-
-fn sort_by_restrictions(update: &[usize], restrictions: &HashSet<(usize, usize)>) -> Vec<usize> {
-    let mut sorted = update.to_vec();
-    let mut swapped = true;
-
-    while swapped {
-        swapped = false;
-        for (r_first, r_second) in restrictions {
-            let idx_first = sorted.iter().position(|&x| x == *r_first);
-            let idx_second = sorted.iter().position(|&x| x == *r_second);
-
-            if let (Some(idx_first), Some(idx_second)) = (idx_first, idx_second) {
-                if idx_first > idx_second {
-                    sorted.swap(idx_first, idx_second);
-                    swapped = true;
+        .iter_mut()
+        .filter(|u| !u.is_sorted_by(|a, b| restrictions[a].contains(b)))
+        .map(|update| {
+            update.sort_by(|a, b| {
+                if restrictions[a].contains(b) {
+                    Ordering::Less
+                } else {
+                    Ordering::Greater
                 }
-            }
-        }
-    }
-
-    sorted
+            });
+            update[update.len() / 2]
+        })
+        .sum()
 }
 
-fn parse() -> (HashSet<(usize, usize)>, Vec<Vec<usize>>) {
+fn parse() -> (HashMap<u16, HashSet<u16>>, Vec<Vec<u16>>) {
     let (restrictions_str, updates_str) = INPUT.split_once("\r\n\r\n").unwrap();
 
-    let mut restr = HashSet::new();
+    let mut restrictions = HashMap::new();
     for line in restrictions_str.lines() {
         let r = line
             .split_once("|")
             .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
             .unwrap();
-        restr.insert(r);
+
+        restrictions
+            .entry(r.0)
+            .or_insert_with(HashSet::new)
+            .insert(r.1);
     }
 
     let mut updates = Vec::new();
@@ -107,5 +64,5 @@ fn parse() -> (HashSet<(usize, usize)>, Vec<Vec<usize>>) {
         updates.push(us);
     }
 
-    (restr, updates)
+    (restrictions, updates)
 }
