@@ -33,7 +33,7 @@ fn part2() {
     println!("part 2: {}", num_ok)
 }
 
-fn parse_line(line: &&str) -> Vec<u32> {
+fn parse_line(line: &str) -> Vec<u32> {
     line.split_whitespace()
         .map(|n| n.parse().unwrap())
         .collect()

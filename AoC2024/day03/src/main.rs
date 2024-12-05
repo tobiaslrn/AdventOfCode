@@ -1,3 +1,5 @@
+use std::num::NonZeroU8;
+
 use regex::Regex;
 
 const INPUT: &str = include_str!("input.txt");
