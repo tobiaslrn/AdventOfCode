@@ -1,15 +1,13 @@
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, HashSet},
-};
+use std::cmp::Ordering::*;
+use std::collections::{HashMap, HashSet};
 
 const INPUT: &str = include_str!("input.txt");
 
 fn main() {
     let now = std::time::Instant::now();
-    let (r, u) = parse();
-    let part1 = part1(&r, &u);
-    let part2 = part2(&r, u);
+    let (rules, updates) = parse();
+    let part1 = part1(&rules, &updates);
+    let part2 = part2(&rules, updates);
     let elapsed = now.elapsed();
 
     println!("Part 1: {}", part1);
@@ -25,18 +23,12 @@ fn part1(restrictions: &HashMap<u16, HashSet<u16>>, updates: &[Vec<u16>]) -> u16
         .sum()
 }
 
-fn part2(restrictions: &HashMap<u16, HashSet<u16>>, mut updates: Vec<Vec<u16>>) -> u16 {
+fn part2(rules: &HashMap<u16, HashSet<u16>>, mut updates: Vec<Vec<u16>>) -> u16 {
     updates
         .iter_mut()
-        .filter(|u| !u.is_sorted_by(|a, b| restrictions[a].contains(b)))
+        .filter(|u| !u.is_sorted_by(|a, b| rules[a].contains(b)))
         .map(|update| {
-            update.sort_by(|a, b| {
-                if restrictions[a].contains(b) {
-                    Ordering::Less
-                } else {
-                    Ordering::Greater
-                }
-            });
+            update.sort_by(|a, b| if rules[a].contains(b) { Less } else { Greater });
             update[update.len() / 2]
         })
         .sum()
